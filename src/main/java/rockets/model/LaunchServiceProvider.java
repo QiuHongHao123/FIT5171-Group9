@@ -2,6 +2,9 @@ package rockets.model;
 
 import com.google.common.collect.Sets;
 
+import static org.apache.commons.lang3.Validate.notBlank;
+
+import java.util.Calendar;
 import java.util.Objects;
 import java.util.Set;
 
@@ -17,10 +20,24 @@ public class LaunchServiceProvider extends Entity {
     private Set<Rocket> rockets;
 
     public LaunchServiceProvider(String name, int yearFounded, String country) {
+        Calendar date = Calendar.getInstance();
+        int currentyear = date.get(Calendar.YEAR);
+    	 if(name == null){
+             throw new NullPointerException("name should not be null");
+         }
+         if(yearFounded < 1000 || yearFounded > currentyear){
+             throw new IllegalArgumentException("The founded year is invalid");
+         }
+         if(country == null){
+             throw new NullPointerException("country should not be null");
+         }
+
+    	
         this.name = name;
         this.yearFounded = yearFounded;
         this.country = country;
 
+        
         rockets = Sets.newLinkedHashSet();
     }
 
@@ -45,10 +62,17 @@ public class LaunchServiceProvider extends Entity {
     }
 
     public void setHeadquarters(String headquarters) {
+    	notBlank(headquarters, "headquarters cannot be null or empty");
         this.headquarters = headquarters;
     }
 
     public void setRockets(Set<Rocket> rockets) {
+    	if(rockets == null) {
+    		throw new NullPointerException("Rockets can't be null");
+    	}
+    	if(rockets.size()==0) {
+    		throw new IllegalArgumentException("The rockets set should not be empty");
+    	}
         this.rockets = rockets;
     }
 
