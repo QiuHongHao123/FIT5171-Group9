@@ -1,2 +1,5 @@
-# FIT5171-a1-maven-proje
-## just test if my account is right
+# FIT5171-a1-maven-project
+## Group members
+### Jinfeng Li
+### Honghao Qiu
+### Shuang Lv

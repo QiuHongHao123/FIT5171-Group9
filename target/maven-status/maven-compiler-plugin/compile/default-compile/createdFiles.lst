@@ -1,6 +1,6 @@
-rockets/model/Launch$LaunchOutcome.class
-rockets/model/User.class
-rockets/model/Entity.class
-rockets/model/Launch.class
-rockets/model/Rocket.class
-rockets/model/LaunchServiceProvider.class
+rockets\model\Launch$LaunchOutcome.class
+rockets\model\LaunchServiceProvider.class
+rockets\model\Rocket.class
+rockets\model\Entity.class
+rockets\model\Launch.class
+rockets\model\User.class
