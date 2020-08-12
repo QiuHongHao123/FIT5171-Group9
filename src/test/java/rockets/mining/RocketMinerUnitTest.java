@@ -153,7 +153,7 @@ public class RocketMinerUnitTest {
     	list.stream().sorted(rocketLaunchNumComparator).limit(k).forEach(l->{
     		result.add(l.getKey());
     	});
-        assertEquals(k, loadedLaunchServiceProviders.size());
+    
         assertEquals(result, loadedLaunchServiceProviders);
     }
 
