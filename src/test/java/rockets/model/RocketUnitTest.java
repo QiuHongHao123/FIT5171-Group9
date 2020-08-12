@@ -15,15 +15,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RocketUnitTest {
     private Rocket target;
+  
     @BeforeEach
     public void setUp() {
-        target=new Rocket("LM-9","China","CALT");
+        target=new Rocket("LM-9","China",new LaunchServiceProvider("CALT", 2000, "AES"));
     }
     @DisplayName("should throw exception when pass null param to construct function")
     @ParameterizedTest
     @MethodSource("rocketGenerator")
     public void shouldThrowExceptionWhenSetParamToNull(String name,String country,String manufacturer){
-        NullPointerException exception = assertThrows(NullPointerException.class, () -> target=new Rocket(name, country, manufacturer));
+        NullPointerException exception = assertThrows(NullPointerException.class, () -> target=new Rocket(name, country, new LaunchServiceProvider("CALT", 2000, "AES")));
         assertEquals("param of construct function cannot be null", exception.getMessage());
     }
     static Stream<Arguments> rocketGenerator(){
@@ -77,7 +78,7 @@ class RocketUnitTest {
         String name = "LM-9";
         String country="China";
         String manufacturer="CALT";
-        Rocket anotherRocket = new Rocket(name,country,manufacturer);
+        Rocket anotherRocket = new Rocket(name,country,new LaunchServiceProvider("CALT", 2000, "China"));
         assertTrue(target.equals(anotherRocket));
     }
     @DisplayName("should return true when two rockets have different infomation")
@@ -86,7 +87,7 @@ class RocketUnitTest {
         String name = "Saturn V";
         String country="USA";
         String manufacturer="NASA";
-        Rocket anotherRocket = new Rocket(name,country,manufacturer);
+        Rocket anotherRocket = new Rocket(name,country,new LaunchServiceProvider("CALT", 2000, "China"));
         assertFalse(target.equals(anotherRocket));
     }
     @DisplayName("should return true when The relationship between GTO and LEO meets the standard ")
@@ -115,7 +116,7 @@ class RocketUnitTest {
     @ParameterizedTest
     @MethodSource("nameAndFamilyGenerator")
     public void shouldReturnFamilyOfRocket(String name,String family){
-        target=new Rocket(name,"USA","ULA");
+        target=new Rocket(name,"USA",new LaunchServiceProvider("CALT", 2000, "China"));
         assertEquals(family,target.belongToFamily());
     }
     static Stream<Arguments> nameAndFamilyGenerator(){

@@ -10,7 +10,7 @@ public class Rocket extends Entity {
 
     private String country;
 
-    private String manufacturer;
+    private LaunchServiceProvider manufacturer;
 
     private String massToLEO;
 
@@ -25,7 +25,7 @@ public class Rocket extends Entity {
      * @param country
      * @param manufacturer
      */
-    public Rocket(String name, String country, String manufacturer) {
+    public Rocket(String name, String country, LaunchServiceProvider manufacturer) {
         notNull(name,"param of construct function cannot be null");
         notNull(country,"param of construct function cannot be null");
         notNull(manufacturer,"param of construct function cannot be null");
@@ -43,7 +43,7 @@ public class Rocket extends Entity {
         return country;
     }
 
-    public String getManufacturer() {
+    public LaunchServiceProvider getManufacturer() {
         return manufacturer;
     }
 
