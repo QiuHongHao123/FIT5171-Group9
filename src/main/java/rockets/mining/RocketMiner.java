@@ -4,14 +4,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rockets.dataaccess.DAO;
 import rockets.model.Launch;
+import rockets.model.Launch.LaunchOutcome;
 import rockets.model.LaunchServiceProvider;
 import rockets.model.Rocket;
 
+import java.util.ArrayList;
 //import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 public class RocketMiner {
@@ -31,7 +36,29 @@ public class RocketMiner {
      * @return the list of k most active rockets.
      */
     public List<Rocket> mostLaunchedRockets(int k) {
-        return Collections.emptyList();
+    	logger.info("find most " + k + " launched rockets");
+ 
+    	Map<Rocket,Integer> rocketLaunched=eachRocketLaunchednum();
+    	Comparator<Map.Entry<Rocket,Integer>> rocketLaunchNumComparator = (a, b) -> a.getValue().compareTo(b.getValue());
+    	List<Map.Entry<Rocket,Integer>> list = new ArrayList<Map.Entry<Rocket,Integer>>(rocketLaunched.entrySet());
+    	Collections.sort(list, rocketLaunchNumComparator);
+    	List<Rocket> result=new ArrayList<Rocket>();
+    	list.stream().sorted(rocketLaunchNumComparator).limit(k).forEach(l->{
+    		result.add(l.getKey());
+    	});
+        return result;
+    }
+    //Return a map, which list each rocket launched amount 
+    public Map<Rocket,Integer> eachRocketLaunchednum(){
+    	Collection<Launch> lauchedcollection=dao.loadAll(Launch.class);
+    	Map<Rocket,Integer> rocketLaunched=new HashMap<Rocket,Integer>();
+    	lauchedcollection.forEach(launch->{
+    		if(rocketLaunched.containsKey(launch.getLaunchVehicle())) {
+    			rocketLaunched.put(launch.getLaunchVehicle(),rocketLaunched.get(launch.getLaunchVehicle())+1);
+    		}
+    		else {rocketLaunched.put(launch.getLaunchVehicle(),1);}
+    	});
+    	return rocketLaunched;
     }
 
     /**
@@ -44,7 +71,40 @@ public class RocketMiner {
      * @return the list of k most reliable ones.
      */
     public List<LaunchServiceProvider> mostReliableLaunchServiceProviders(int k) {
-        return Collections.emptyList();
+    	logger.info("find most " + k + " reliable launch service providers");
+        Map<LaunchServiceProvider,Float> successRate= eachLauchServiceLaunchedSuccessrate();
+        
+        Comparator<Map.Entry<LaunchServiceProvider,Float>> rocketLaunchNumComparator = (a, b) -> a.getValue().compareTo(b.getValue());
+    	List<Map.Entry<LaunchServiceProvider,Float>> list = new ArrayList<Map.Entry<LaunchServiceProvider,Float>>(successRate.entrySet());
+    	Collections.sort(list, rocketLaunchNumComparator);
+    	List<LaunchServiceProvider> result=new ArrayList<LaunchServiceProvider>();
+    	list.stream().sorted(rocketLaunchNumComparator).limit(k).forEach(l->{
+    		result.add(l.getKey());
+    	});
+		return result;
+        
+    }
+    //return the success rate of each provider  
+    public Map<LaunchServiceProvider,Float> eachLauchServiceLaunchedSuccessrate(){
+    	Collection<Launch> launches = dao.loadAll(Launch.class);
+    	Map<LaunchServiceProvider,Integer> successLaunch=new HashMap<LaunchServiceProvider,Integer>();
+        Map<LaunchServiceProvider,Integer> totalLaunch=new HashMap<LaunchServiceProvider,Integer>();
+        launches.forEach(l->{
+        	if(!successLaunch.containsKey(l.getLaunchServiceProvider())){
+        		successLaunch.put(l.getLaunchServiceProvider(),0);
+        		totalLaunch.put(l.getLaunchServiceProvider(),0);
+        	}
+        	totalLaunch.put(l.getLaunchServiceProvider(),totalLaunch.get(l.getLaunchServiceProvider())+1);
+        	if(l.getLaunchOutcome()==LaunchOutcome.SUCCESSFUL) {
+        		successLaunch.put(l.getLaunchServiceProvider(),successLaunch.get(l.getLaunchServiceProvider())+1);
+        	}  	
+        });
+        Map<LaunchServiceProvider,Float> successRate=new HashMap<LaunchServiceProvider,Float>();
+        for(Entry<LaunchServiceProvider, Integer> entry: totalLaunch.entrySet()) {
+        	successRate.put(entry.getKey(),new Float(successLaunch.get(entry.getKey())/entry.getValue()));
+        }
+        return successRate;
+    	
     }
 
     /**
