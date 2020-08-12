@@ -129,7 +129,25 @@ public class RocketMiner {
      * @param orbit the orbit
      * @return the country who sends the most payload to the orbit
      */
-    public String dominantCountry(String orbit) { return null;}
+    public String dominantCountry(String orbit) {
+        logger.info("Returns the dominant country who has the most launched rockets in " + orbit + "orbit.");
+        Collection<Launch> launches = dao.loadAll(Launch.class);
+        HashMap<String,Integer> cur = new HashMap<>();
+        launches.forEach(l->{
+            String temp = l.getLaunchServiceProvider().getCountry();
+            if(orbit.equals(l.getOrbit()))
+                cur.put(temp,cur.getOrDefault(temp,0)+1);
+        });
+        String ans = "";
+        int ansCount = 0;
+        for(String county:cur.keySet()){
+            if(cur.get(county) > ansCount){
+                ansCount = cur.get(county);
+                ans = county;
+            }
+        }
+        return ans;
+    }
 
     /**
      * TODO: to be implemented & tested!

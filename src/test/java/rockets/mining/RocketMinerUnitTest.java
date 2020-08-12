@@ -164,7 +164,29 @@ public class RocketMinerUnitTest {
         assertEquals(k, loadedLaunchServiceProviders.size());
         assertEquals(result, loadedLaunchServiceProviders);
     }
+    @DisplayName("Returns the dominant country who has the most launched rockets in an orbit.")
+    @ParameterizedTest
+    @ValueSource(strings = {"USA", "Europe "})
+    public void shouldReturnDominantCountry(String orbit){
+        when(dao.loadAll(Launch.class)).thenReturn(launches);
+        HashMap<String,Integer> cur = new HashMap<>();
+        launches.forEach(l->{
+            String temp = l.getLaunchServiceProvider().getCountry();
+            if(orbit.equals(l.getOrbit()))
+                cur.put(temp,cur.getOrDefault(temp,0)+1);
+        });
+        String ans = "";
+        int ansCount = 0;
+        for(String county:cur.keySet()){
+            if(cur.get(county) > ansCount){
+                ansCount = cur.get(county);
+                ans = county;
+            }
+        }
+        String testResult = miner.dominantCountry(orbit);
+        assertEquals(testResult,ans);
 
+    }
     @DisplayName("should return top expensive launches")
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 3})
