@@ -36,29 +36,29 @@ public class RocketMiner {
      * @return the list of k most active rockets.
      */
     public List<Rocket> mostLaunchedRockets(int k) {
-    	logger.info("find most " + k + " launched rockets");
- 
-    	Map<Rocket,Integer> rocketLaunched=eachRocketLaunchednum();
-    	Comparator<Map.Entry<Rocket,Integer>> rocketLaunchNumComparator = (a, b) -> a.getValue().compareTo(b.getValue());
-    	List<Map.Entry<Rocket,Integer>> list = new ArrayList<Map.Entry<Rocket,Integer>>(rocketLaunched.entrySet());
-    	Collections.sort(list, rocketLaunchNumComparator);
-    	List<Rocket> result=new ArrayList<Rocket>();
-    	list.stream().sorted(rocketLaunchNumComparator).limit(k).forEach(l->{
-    		result.add(l.getKey());
-    	});
+        logger.info("find most " + k + " launched rockets");
+
+        Map<Rocket,Integer> rocketLaunched=eachRocketLaunchednum();
+        Comparator<Map.Entry<Rocket,Integer>> rocketLaunchNumComparator = (a, b) -> a.getValue().compareTo(b.getValue());
+        List<Map.Entry<Rocket,Integer>> list = new ArrayList<Map.Entry<Rocket,Integer>>(rocketLaunched.entrySet());
+        Collections.sort(list, rocketLaunchNumComparator);
+        List<Rocket> result=new ArrayList<Rocket>();
+        list.stream().sorted(rocketLaunchNumComparator).limit(k).forEach(l->{
+            result.add(l.getKey());
+        });
         return result;
     }
     //Return a map, which list each rocket launched amount 
     public Map<Rocket,Integer> eachRocketLaunchednum(){
-    	Collection<Launch> lauchedcollection=dao.loadAll(Launch.class);
-    	Map<Rocket,Integer> rocketLaunched=new HashMap<Rocket,Integer>();
-    	lauchedcollection.forEach(launch->{
-    		if(rocketLaunched.containsKey(launch.getLaunchVehicle())) {
-    			rocketLaunched.put(launch.getLaunchVehicle(),rocketLaunched.get(launch.getLaunchVehicle())+1);
-    		}
-    		else {rocketLaunched.put(launch.getLaunchVehicle(),1);}
-    	});
-    	return rocketLaunched;
+        Collection<Launch> lauchedcollection=dao.loadAll(Launch.class);
+        Map<Rocket,Integer> rocketLaunched=new HashMap<Rocket,Integer>();
+        lauchedcollection.forEach(launch->{
+            if(rocketLaunched.containsKey(launch.getLaunchVehicle())) {
+                rocketLaunched.put(launch.getLaunchVehicle(),rocketLaunched.get(launch.getLaunchVehicle())+1);
+            }
+            else {rocketLaunched.put(launch.getLaunchVehicle(),1);}
+        });
+        return rocketLaunched;
     }
 
     /**
@@ -71,40 +71,40 @@ public class RocketMiner {
      * @return the list of k most reliable ones.
      */
     public List<LaunchServiceProvider> mostReliableLaunchServiceProviders(int k) {
-    	logger.info("find most " + k + " reliable launch service providers");
+        logger.info("find most " + k + " reliable launch service providers");
         Map<LaunchServiceProvider,Float> successRate= eachLauchServiceLaunchedSuccessrate();
-        
+
         Comparator<Map.Entry<LaunchServiceProvider,Float>> rocketLaunchNumComparator = (a, b) -> a.getValue().compareTo(b.getValue());
-    	List<Map.Entry<LaunchServiceProvider,Float>> list = new ArrayList<Map.Entry<LaunchServiceProvider,Float>>(successRate.entrySet());
-    	Collections.sort(list, rocketLaunchNumComparator);
-    	List<LaunchServiceProvider> result=new ArrayList<LaunchServiceProvider>();
-    	list.stream().sorted(rocketLaunchNumComparator).limit(k).forEach(l->{
-    		result.add(l.getKey());
-    	});
-		return result;
-        
+        List<Map.Entry<LaunchServiceProvider,Float>> list = new ArrayList<Map.Entry<LaunchServiceProvider,Float>>(successRate.entrySet());
+        Collections.sort(list, rocketLaunchNumComparator);
+        List<LaunchServiceProvider> result=new ArrayList<LaunchServiceProvider>();
+        list.stream().sorted(rocketLaunchNumComparator).limit(k).forEach(l->{
+            result.add(l.getKey());
+        });
+        return result;
+
     }
     //return the success rate of each provider  
     public Map<LaunchServiceProvider,Float> eachLauchServiceLaunchedSuccessrate(){
-    	Collection<Launch> launches = dao.loadAll(Launch.class);
-    	Map<LaunchServiceProvider,Integer> successLaunch=new HashMap<LaunchServiceProvider,Integer>();
+        Collection<Launch> launches = dao.loadAll(Launch.class);
+        Map<LaunchServiceProvider,Integer> successLaunch=new HashMap<LaunchServiceProvider,Integer>();
         Map<LaunchServiceProvider,Integer> totalLaunch=new HashMap<LaunchServiceProvider,Integer>();
         launches.forEach(l->{
-        	if(!successLaunch.containsKey(l.getLaunchServiceProvider())){
-        		successLaunch.put(l.getLaunchServiceProvider(),0);
-        		totalLaunch.put(l.getLaunchServiceProvider(),0);
-        	}
-        	totalLaunch.put(l.getLaunchServiceProvider(),totalLaunch.get(l.getLaunchServiceProvider())+1);
-        	if(l.getLaunchOutcome()==LaunchOutcome.SUCCESSFUL) {
-        		successLaunch.put(l.getLaunchServiceProvider(),successLaunch.get(l.getLaunchServiceProvider())+1);
-        	}  	
+            if(!successLaunch.containsKey(l.getLaunchServiceProvider())){
+                successLaunch.put(l.getLaunchServiceProvider(),0);
+                totalLaunch.put(l.getLaunchServiceProvider(),0);
+            }
+            totalLaunch.put(l.getLaunchServiceProvider(),totalLaunch.get(l.getLaunchServiceProvider())+1);
+            if(l.getLaunchOutcome()==LaunchOutcome.SUCCESSFUL) {
+                successLaunch.put(l.getLaunchServiceProvider(),successLaunch.get(l.getLaunchServiceProvider())+1);
+            }
         });
         Map<LaunchServiceProvider,Float> successRate=new HashMap<LaunchServiceProvider,Float>();
         for(Entry<LaunchServiceProvider, Integer> entry: totalLaunch.entrySet()) {
-        	successRate.put(entry.getKey(),new Float(successLaunch.get(entry.getKey())/entry.getValue()));
+            successRate.put(entry.getKey(),new Float(successLaunch.get(entry.getKey())/entry.getValue()));
         }
         return successRate;
-    	
+
     }
 
     /**
@@ -140,7 +140,10 @@ public class RocketMiner {
      * @return the list of k most expensive launches.
      */
     public List<Launch> mostExpensiveLaunches(int k) {
-        return Collections.emptyList();
+        logger.info("find most expensive " + k + " launches");
+        Collection<Launch> launches = dao.loadAll(Launch.class);
+        Comparator<Launch> launchDateComparator = (a, b) -> -Double.valueOf(a.getPrice().doubleValue()).compareTo(Double.valueOf(b.getPrice().doubleValue()));
+        return launches.stream().sorted(launchDateComparator).limit(k).collect(Collectors.toList());
     }
 
     /**
@@ -154,6 +157,15 @@ public class RocketMiner {
      * @return the list of k launch service providers who has the highest sales revenue.
      */
     public List<LaunchServiceProvider> highestRevenueLaunchServiceProviders(int k, int year) {
-        return Collections.emptyList();
+        logger.info("find the highest " + k + " sales revenue in a year");
+        Collection<LaunchServiceProvider> launchServiceProviders = dao.loadAll(LaunchServiceProvider.class);
+        List<LaunchServiceProvider> providerspInYear=new ArrayList<>();
+        for(LaunchServiceProvider temp:launchServiceProviders){
+            if(temp.getYearFounded()==year){
+                providerspInYear.add(temp);
+            }
+        }
+        Comparator<LaunchServiceProvider> launchServiceProvidersDateComparator = (a, b) -> -Integer.valueOf(a.getRockets().size()).compareTo(Integer.valueOf(b.getRockets().size()));
+        return providerspInYear.stream().sorted(launchServiceProvidersDateComparator).limit(k).collect(Collectors.toList());
     }
 }
