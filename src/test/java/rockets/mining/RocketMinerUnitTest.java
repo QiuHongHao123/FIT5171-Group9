@@ -2,6 +2,7 @@ package rockets.mining;
 
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
@@ -9,13 +10,19 @@ import org.slf4j.LoggerFactory;
 import rockets.dataaccess.DAO;
 import rockets.dataaccess.neo4j.Neo4jDAO;
 import rockets.model.Launch;
+import rockets.model.Launch.LaunchOutcome;
 import rockets.model.LaunchServiceProvider;
 import rockets.model.Rocket;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -54,6 +61,11 @@ public class RocketMinerUnitTest {
 
         // index of rocket of each launch
         int[] rocketIndex = new int[]{0, 0, 0, 0, 1, 1, 1, 2, 2, 3};
+        // outcome of each launch
+        LaunchOutcome[] outcome = new LaunchOutcome[]{
+                LaunchOutcome.SUCCESSFUL, LaunchOutcome.SUCCESSFUL, LaunchOutcome.SUCCESSFUL, LaunchOutcome.SUCCESSFUL, LaunchOutcome.FAILED,
+                LaunchOutcome.FAILED, LaunchOutcome.FAILED, LaunchOutcome.FAILED, LaunchOutcome.SUCCESSFUL, LaunchOutcome.SUCCESSFUL
+        };
 
         // 10 launches
         launches = IntStream.range(0, 10).mapToObj(i -> {
@@ -61,7 +73,9 @@ public class RocketMinerUnitTest {
             Launch l = new Launch();
             l.setLaunchDate(LocalDate.of(2017, months[i], 1));
             l.setLaunchVehicle(rockets.get(rocketIndex[i]));
+            l.setLaunchServiceProvider(rockets.get(rocketIndex[i]).getManufacturer());
             l.setLaunchSite("VAFB");
+            l.setLaunchOutcome(outcome[i]);
             l.setOrbit("LEO");
             spy(l);
             return l;
@@ -79,4 +93,69 @@ public class RocketMinerUnitTest {
         assertEquals(k, loadedLaunches.size());
         assertEquals(sortedLaunches.subList(0, k), loadedLaunches);
     }
+    
+
+    @DisplayName("should return most top most LaunchedRockets")
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    public void shouldReturnTopMostLaunchedRockets(int k) {
+        when(dao.loadAll(Launch.class)).thenReturn(launches);
+        List<Launch> alllaunches = new ArrayList<>(launches);
+        Map<Rocket, List<Launch>> rockets = alllaunches.stream().
+                collect(Collectors.groupingBy(Launch::getLaunchVehicle));
+        Map<Rocket, Integer> numOfRockets = new HashMap<Rocket, Integer>();
+        rockets.forEach((key, value) -> {
+            numOfRockets.put(key, value.size());
+        });
+
+        List<Map.Entry<Rocket, Integer>> numOfRocketsList = new ArrayList<Map.Entry<Rocket, Integer>>(numOfRockets.entrySet());
+        List<Rocket> mostLaunchedRockets = numOfRocketsList.stream().
+                sorted(new Comparator<Map.Entry<Rocket, Integer>>() {
+                    @Override
+                    public int compare(Map.Entry<Rocket, Integer> o1, Map.Entry<Rocket, Integer> o2) {
+                        return o1.getValue()-o2.getValue();
+                    }
+                }).map(Map.Entry::getKey).limit(k).collect(Collectors.toList());
+
+        List<Rocket> launchedRockets = miner.mostLaunchedRockets(k);
+        assertEquals(k, launchedRockets.size());
+        assertEquals(mostLaunchedRockets.subList(0, k), launchedRockets);
+    }
+    
+    @DisplayName("should return most reliable launch service providers")
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    public void shouldReturnMostReliableLaunchServiceProviders(int k){
+        when(dao.loadAll(Launch.class)).thenReturn(launches);
+  
+        List<LaunchServiceProvider> loadedLaunchServiceProviders = miner.mostReliableLaunchServiceProviders(k);
+        
+        Map<LaunchServiceProvider,Integer> successLaunch=new HashMap<LaunchServiceProvider,Integer>();
+        Map<LaunchServiceProvider,Integer> totalLaunch=new HashMap<LaunchServiceProvider,Integer>();
+        launches.forEach(l->{
+        	if(!successLaunch.containsKey(l.getLaunchServiceProvider())){
+        		successLaunch.put(l.getLaunchServiceProvider(),0);
+        		totalLaunch.put(l.getLaunchServiceProvider(),0);
+        	}
+        	totalLaunch.put(l.getLaunchServiceProvider(),totalLaunch.get(l.getLaunchServiceProvider())+1);
+        	if(l.getLaunchOutcome()==LaunchOutcome.SUCCESSFUL) {
+        		successLaunch.put(l.getLaunchServiceProvider(),successLaunch.get(l.getLaunchServiceProvider())+1);
+        	}  	
+        });
+        Map<LaunchServiceProvider,Float> successRate=new HashMap<LaunchServiceProvider,Float>();
+        for(Entry<LaunchServiceProvider, Integer> entry: totalLaunch.entrySet()) {
+        	successRate.put(entry.getKey(),new Float(successLaunch.get(entry.getKey())/entry.getValue()));
+        }
+        Comparator<Map.Entry<LaunchServiceProvider,Float>> rocketLaunchNumComparator = (a, b) -> a.getValue().compareTo(b.getValue());
+    	List<Map.Entry<LaunchServiceProvider,Float>> list = new ArrayList<Map.Entry<LaunchServiceProvider,Float>>(successRate.entrySet());
+    	Collections.sort(list, rocketLaunchNumComparator);
+    	List<LaunchServiceProvider> result=new ArrayList<LaunchServiceProvider>();
+    	list.stream().sorted(rocketLaunchNumComparator).limit(k).forEach(l->{
+    		result.add(l.getKey());
+    	});
+        assertEquals(k, loadedLaunchServiceProviders.size());
+        assertEquals(result, loadedLaunchServiceProviders);
+    }
+
+    
 }
