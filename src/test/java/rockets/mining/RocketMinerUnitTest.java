@@ -161,7 +161,7 @@ public class RocketMinerUnitTest {
         list.stream().sorted(rocketLaunchNumComparator).limit(k).forEach(l->{
             result.add(l.getKey());
         });
-        assertEquals(k, loadedLaunchServiceProviders.size());
+       
         assertEquals(result, loadedLaunchServiceProviders);
     }
     @DisplayName("Returns the dominant country who has the most launched rockets in an orbit.")
