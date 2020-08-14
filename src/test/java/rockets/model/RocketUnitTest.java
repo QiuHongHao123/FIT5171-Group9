@@ -23,12 +23,12 @@ class RocketUnitTest {
     @DisplayName("should throw exception when pass null param to construct function")
     @ParameterizedTest
     @MethodSource("rocketGenerator")
-    public void shouldThrowExceptionWhenSetParamToNull(String name,String country,String manufacturer){
-        NullPointerException exception = assertThrows(NullPointerException.class, () -> target=new Rocket(name, country, new LaunchServiceProvider("CALT", 2000, "AES")));
+    public void shouldThrowExceptionWhenSetParamToNull(String name,String country,LaunchServiceProvider manufacturer){
+        NullPointerException exception = assertThrows(NullPointerException.class, () -> target=new Rocket(name, country,manufacturer ));
         assertEquals("param of construct function cannot be null", exception.getMessage());
     }
     static Stream<Arguments> rocketGenerator(){
-        return Stream.of(Arguments.of(null, "USA","ULA"), Arguments.of("Zenit",null, "Unknown"), Arguments.of("OmegA", "USA",null));
+        return Stream.of(Arguments.of(null, "USA",new LaunchServiceProvider("CALT", 2000, "AES")), Arguments.of("Zenit",null, new LaunchServiceProvider("CALT", 2000, "AES")), Arguments.of("OmegA", "USA",null));
     }
 
     @DisplayName("should throw exception when pass null to setMassToLEO function")
@@ -77,8 +77,8 @@ class RocketUnitTest {
     public void shouldReturnTrueWhenRocketsHaveSameINfo() {
         String name = "LM-9";
         String country="China";
-        String manufacturer="CALT";
-        Rocket anotherRocket = new Rocket(name,country,new LaunchServiceProvider("CALT", 2000, "China"));
+        LaunchServiceProvider manufacturer=new LaunchServiceProvider("CALT", 2000, "AES");
+        Rocket anotherRocket = new Rocket(name,country,manufacturer);
         assertTrue(target.equals(anotherRocket));
     }
     @DisplayName("should return true when two rockets have different infomation")
