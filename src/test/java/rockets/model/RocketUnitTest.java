@@ -77,8 +77,8 @@ class RocketUnitTest {
     public void shouldReturnTrueWhenRocketsHaveSameINfo() {
         String name = "LM-9";
         String country="China";
-        String manufacturer="CALT";
-        Rocket anotherRocket = new Rocket(name,country,new LaunchServiceProvider("CALT", 2000, "China"));
+
+        Rocket anotherRocket = new Rocket(name,country,new LaunchServiceProvider("CALT", 2000, "AES"));
         assertTrue(target.equals(anotherRocket));
     }
     @DisplayName("should return true when two rockets have different infomation")
