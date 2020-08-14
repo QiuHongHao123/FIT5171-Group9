@@ -31,6 +31,7 @@ class RocketUnitTest {
         return Stream.of(Arguments.of(null, "USA",new LaunchServiceProvider("CALT", 2000, "AES")), Arguments.of("Zenit",null, new LaunchServiceProvider("CALT", 2000, "AES")), Arguments.of("OmegA", "USA",null));
     }
 
+
     @DisplayName("should throw exception when pass null to setMassToLEO function")
     @Test
     public void shouldThrowExceptionWhenSetMassToLEOToNull() {
